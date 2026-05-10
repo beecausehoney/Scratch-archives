@@ -1,24 +1,40 @@
 name: Remote Rescue
-on: workflow_dispatch # This lets you start it with a button click
+on: workflow_dispatch
 
 jobs:
   download:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # This is the magic line!
     steps:
       - uses: actions/checkout@v4
       
-      - name: Fetch Installers
+      - name: Fetch All Installers
         run: |
           mkdir -p installers
           cd installers
-          # Download 1.0 and 1.4 RC as a test
-          wget -q https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.0/ScratchInstaller1.0.exe
-          wget -q https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/ScratchInstaller1.4rc.exe
+          
+          # 1.x Series
+          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.0/ScratchInstaller1.0.exe
+          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.0.1/ScratchInstaller1.0.1.exe
+          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.1/ScratchInstaller.exe
+          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.2/ScratchInstaller1.2.exe
+          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.2.1/ScratchInstaller1.2.1.exe
+          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/ScratchInstaller1.3.exe
+          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/ScratchInstaller1.3.1.exe
+          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/ScratchInstaller1.4.exe
+          wget -q -nc https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/ScratchInstaller1.4rc.exe
+          
+          # 2.0 Standalone Builds
+          wget -q -nc https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/scratch2download/sa/Scratch-434.exe
+          wget -q -nc https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/scratch2download/sa/Scratch-437.exe
+          wget -q -nc https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/scratch2download/sa/Scratch-448.exe
+          wget -q -nc https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/scratch2download/sa/Scratch-461.exe
           
       - name: Push to Repo
         run: |
           git config --global user.name "Archive-Bot"
           git config --global user.email "bot@github.com"
           git add installers/
-          git commit -m "Remote rescue from Wayback Machine"
-          git push
+          # Only commit if there are actually new files
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Remote rescue from Wayback Machine" && git push)
