@@ -1,0 +1,24 @@
+name: Remote Rescue
+on: workflow_dispatch # This lets you start it with a button click
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Fetch Installers
+        run: |
+          mkdir -p installers
+          cd installers
+          # Download 1.0 and 1.4 RC as a test
+          wget -q https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.0/ScratchInstaller1.0.exe
+          wget -q https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/ScratchInstaller1.4rc.exe
+          
+      - name: Push to Repo
+        run: |
+          git config --global user.name "Archive-Bot"
+          git config --global user.email "bot@github.com"
+          git add installers/
+          git commit -m "Remote rescue from Wayback Machine"
+          git push
