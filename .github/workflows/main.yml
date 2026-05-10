@@ -1,40 +1,54 @@
-name: Remote Rescue
+name: Complete Remote Rescue
 on: workflow_dispatch
 
 jobs:
-  download:
+  rescue-archive:
     runs-on: ubuntu-latest
+    # This grants the GitHub VM the keys to write to your repo
     permissions:
-      contents: write # This is the magic line!
+      contents: write
+
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Fetch All Installers
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Installers from Wayback Machine
         run: |
           mkdir -p installers
           cd installers
-          
-          # 1.x Series
-          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.0/ScratchInstaller1.0.exe
-          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.0.1/ScratchInstaller1.0.1.exe
-          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.1/ScratchInstaller.exe
-          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.2/ScratchInstaller1.2.exe
-          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/Scratch1.2.1/ScratchInstaller1.2.1.exe
-          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/ScratchInstaller1.3.exe
-          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/ScratchInstaller1.3.1.exe
-          wget -q -nc https://web.archive.org/web/2021id_/http://download.scratch.mit.edu/ScratchInstaller1.4.exe
-          wget -q -nc https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/ScratchInstaller1.4rc.exe
-          
-          # 2.0 Standalone Builds
-          wget -q -nc https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/scratch2download/sa/Scratch-434.exe
-          wget -q -nc https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/scratch2download/sa/Scratch-437.exe
-          wget -q -nc https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/scratch2download/sa/Scratch-448.exe
-          wget -q -nc https://web.archive.org/web/2021id_/https://download.scratch.mit.edu/scratch2download/sa/Scratch-461.exe
-          
-      - name: Push to Repo
-        run: |
-          git config --global user.name "Archive-Bot"
-          git config --global user.email "bot@github.com"
-          git add installers/
-          # Only commit if there are actually new files
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Remote rescue from Wayback Machine" && git push)
+
+          # The complete master list
+          urls=(
+            "http://download.scratch.mit.edu/Scratch1.0.1/ScratchInstaller1.0.1.exe"
+            "http://download.scratch.mit.edu/Scratch1.0/ScratchInstaller1.0.exe"
+            "http://download.scratch.mit.edu/Scratch1.1/ScratchInstaller.exe"
+            "http://download.scratch.mit.edu/Scratch1.2.1/ScratchInstaller1.2.1.exe"
+            "http://download.scratch.mit.edu/Scratch1.2/ScratchInstaller1.2.exe"
+            "http://download.scratch.mit.edu/ScratchInstaller1.0.exe"
+            "http://download.scratch.mit.edu/ScratchInstaller1.3.1.exe"
+            "http://download.scratch.mit.edu/ScratchInstaller1.3.exe"
+            "http://download.scratch.mit.edu/ScratchInstaller1.4.exe"
+            "http://download.scratch.mit.edu/ScratchInstaller2.0.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-434.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-434a.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-435.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-437.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-439.3.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-441.1.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-444.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-447.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-448.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-451.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-453.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-454.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-456.0.4.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-458.0.1.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-460.exe"
+            "https://download.scratch.mit.edu/scratch2download/sa/Scratch-461.exe"
+            "https://download.scratch.mit.edu/ScratchInstaller.exe"
+            "https://download.scratch.mit.edu/ScratchInstaller1.4rc.exe"
+          )
+
+          for url in "${urls[@]}"; do
+            # Name correction to prevent file overwriting
+            if [[ "$url" == *"Scratch1
